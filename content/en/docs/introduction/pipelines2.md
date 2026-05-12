@@ -1,0 +1,101 @@
+---
+title: "Pipeline Elements Reference"
+linkTitle: "Elements Detail"
+weight: 20
+description: >
+  Detailed information about the categories and individual elements used in Stroom pipelines.
+---
+
+
+A Stroom pipeline is built by connecting various **Elements**.
+Each element belongs to a specific category and has a defined role in the data processing flow.
+
+
+## Element Categories
+
+Pipeline elements are grouped into several logical categories based on their function:
+
+
+### Source
+
+The entry point of a pipeline.
+It defines where the data comes from.
+
+*   **Source:** The standard element that provides the input stream from the Stroom data store.
+
+
+### Parsers
+
+Parsers convert raw input data (bytes) into XML events (SAX events).
+
+*   **DSParser (Data Splitter):** The most common parser.
+    It uses a "Text Converter" (defined in a separate document) to parse structured text like CSV, TSV, or fixed-width logs into XML.
+*   **XMLParser:** Used when the input data is already XML.
+    It validates and parses the input into SAX events.
+*   **JSONParser:** Converts input JSON into XML events conforming to the standard XSLT-JSON XML schema.
+*   **XMLFragmentParser:** Wraps non-well-formed XML fragments with a root element to make them processable.
+
+
+### Filters
+
+Filters act upon the stream of XML events.
+They can modify, split, or supplement the data.
+
+*   **XSLTFilter:** The workhorse of Stroom transformations.
+    It applies an XSLT stylesheet to the XML event stream.
+    It is used for renaming fields, restructuring data, and performing lookups.
+*   **ReferenceDataFilter:** A specialized filter used to load reference data into an internal map for high-speed lookups in other pipelines.
+*   **RecordCountFilter:** Simply counts the number of records passing through and can provide statistics.
+*   **SplitFilter:** Used to split a single large XML stream into multiple smaller streams based on specific criteria.
+*   **IdEnrichmentFilter:** Adds unique IDs to records.
+*   **RecordOutputFilter:** Used during stepping to capture and display the state of the data at a specific point in the pipeline.
+
+
+### Writers
+
+Writers take the stream of XML events and convert them back into a serialized format.
+
+*   **XMLWriter:** Serializes XML events back into a well-formed XML string.
+*   **JSONWriter:** Converts XML events (conforming to the XSLT-JSON schema) into a JSON string.
+*   **TextWriter:** Converts XML events into plain text, often used after an XSLT that has flattened the data.
+
+
+### Destinations (Appenders)
+
+Destinations define where the serialized output should be saved.
+
+*   **StreamAppender:** Writes the output back into the Stroom data store as a new stream.
+    You can specify the Feed and Stream Type for the output.
+*   **FileAppender:** Writes the output to a file on the local file system.
+*   **HDFSFileAppender:** Writes the output to a Hadoop Distributed File System (HDFS).
+*   **HTTPAppender:** Posts the output to a remote HTTP(S) endpoint.
+*   **RollingStreamAppender:** Similar to StreamAppender but "rolls" the stream based on size or time thresholds.
+*   **IndexingFilter:** Technically a filter, but often acts as a destination by sending data directly into a Lucene or Elasticsearch index.
+
+
+## Common Element Properties
+
+Most elements have properties that control their behavior.
+Common ones include:
+
+| Property | Description |
+| :--- | :--- |
+| **Feed** | (Appenders) The feed to which the output stream should be assigned. |
+| **Stream Type** | (Appenders) The type of data (e.g., Raw Events, Events, Context). |
+| **XSLT** | (XSLTFilter) The DocRef of the XSLT stylesheet to apply. |
+| **Text Converter** | (DSParser) The DocRef of the Text Converter configuration to use. |
+| **Encoding** | (Writers) The character encoding (e.g., UTF-8) to use for the output. |
+
+
+## Role and Visibility
+
+When viewing elements in the Pipeline UI, you may see different roles:
+
+*   **Target:** The element receives data from a previous element.
+*   **Mutator:** The element modifies the data as it passes through.
+*   **Destination:** The element is an end-point for the data.
+
+Elements also have different **Visibility**:
+
+*   **Simple:** Visible in the standard pipeline editor.
+*   **Stepping:** Visible and interactive during the debugging/stepping process.
