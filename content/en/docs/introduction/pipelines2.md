@@ -1,7 +1,7 @@
 ---
 title: "Pipeline Elements Reference"
-linkTitle: "Elements Detail"
-weight: 20
+linkTitle: "Pipeline Elements Detail"
+weight: 10
 description: >
   Detailed information about the categories and individual elements used in Stroom pipelines.
 ---
@@ -13,70 +13,142 @@ Each element belongs to a specific category and has a defined role in the data p
 
 ## Element Categories
 
+
 Pipeline elements are grouped into several logical categories based on their function:
 
 
 ### Source
 
+
 The entry point of a pipeline.
 It defines where the data comes from.
 
-*   **Source:** The standard element that provides the input stream from the Stroom data store.
+
+*   **Source**:
+    The standard element that provides the input stream from the Stroom data store.
 
 
 ### Parsers
 
+
 Parsers convert raw input data (bytes) into XML events (SAX events).
 
-*   **DSParser (Data Splitter):** The most common parser.
+
+*   **DSParser**:
+    The Data Splitter parser.
     It uses a "Text Converter" (defined in a separate document) to parse structured text like CSV, TSV, or fixed-width logs into XML.
-*   **XMLParser:** Used when the input data is already XML.
+*   **XMLParser**:
+    Used when the input data is already XML.
     It validates and parses the input into SAX events.
-*   **JSONParser:** Converts input JSON into XML events conforming to the standard XSLT-JSON XML schema.
-*   **XMLFragmentParser:** Wraps non-well-formed XML fragments with a root element to make them processable.
+*   **JSONParser**:
+    Converts input JSON into XML events conforming to the standard XSLT-JSON XML schema.
+*   **XMLFragmentParser**:
+    Wraps non-well-formed XML fragments with a root element to make them processable.
 
 
 ### Filters
 
+
 Filters act upon the stream of XML events.
 They can modify, split, or supplement the data.
 
-*   **XSLTFilter:** The workhorse of Stroom transformations.
+
+*   **XSLTFilter**:
+    The workhorse of Stroom transformations.
     It applies an XSLT stylesheet to the XML event stream.
     It is used for renaming fields, restructuring data, and performing lookups.
-*   **ReferenceDataFilter:** A specialized filter used to load reference data into an internal map for high-speed lookups in other pipelines.
-*   **RecordCountFilter:** Simply counts the number of records passing through and can provide statistics.
-*   **SplitFilter:** Used to split a single large XML stream into multiple smaller streams based on specific criteria.
-*   **IdEnrichmentFilter:** Adds unique IDs to records.
-*   **RecordOutputFilter:** Used during stepping to capture and display the state of the data at a specific point in the pipeline.
+*   **SchemaFilter**:
+    Performs inline XML schema (XSD) validation of the XML event stream.
+    It ensures that the XML produced by a parser or XSLT conforms to a defined schema.
+*   **ReferenceDataFilter**:
+    A specialized filter used to load reference data into an internal map for high-speed lookups in other pipelines.
+*   **RecordCountFilter**:
+    Simply counts the number of records passing through and can provide statistics.
+*   **SplitFilter**:
+    Used to split a single large XML stream into multiple smaller streams based on specific criteria.
+*   **IdEnrichmentFilter**:
+    Adds unique IDs to records.
+*   **RecordOutputFilter**:
+    Used during stepping to capture and display the state of the data at a specific point in the pipeline.
 
 
 ### Writers
 
+
 Writers take the stream of XML events and convert them back into a serialized format.
 
-*   **XMLWriter:** Serializes XML events back into a well-formed XML string.
-*   **JSONWriter:** Converts XML events (conforming to the XSLT-JSON schema) into a JSON string.
-*   **TextWriter:** Converts XML events into plain text, often used after an XSLT that has flattened the data.
+
+*   **XMLWriter**:
+    Serializes XML events back into a well-formed XML string.
+*   **JSONWriter**:
+    Converts XML events (conforming to the XSLT-JSON schema) into a JSON string.
+*   **TextWriter**:
+    Converts XML events into plain text, often used after an XSLT that has flattened the data.
 
 
 ### Destinations (Appenders)
 
+
 Destinations define where the serialized output should be saved.
 
-*   **StreamAppender:** Writes the output back into the Stroom data store as a new stream.
+
+*   **StreamAppender**:
+    Writes the output back into the Stroom data store as a new stream.
     You can specify the Feed and Stream Type for the output.
-*   **FileAppender:** Writes the output to a file on the local file system.
-*   **HDFSFileAppender:** Writes the output to a Hadoop Distributed File System (HDFS).
-*   **HTTPAppender:** Posts the output to a remote HTTP(S) endpoint.
-*   **RollingStreamAppender:** Similar to StreamAppender but "rolls" the stream based on size or time thresholds.
-*   **IndexingFilter:** Technically a filter, but often acts as a destination by sending data directly into a Lucene or Elasticsearch index.
+*   **FileAppender**:
+    Writes the output to a file on the local file system.
+*   **HDFSFileAppender**:
+    Writes the output to a Hadoop Distributed File System (HDFS).
+*   **HTTPAppender**:
+    Posts the output to a remote HTTP(S) endpoint.
+*   **RollingStreamAppender**:
+    Similar to StreamAppender but "rolls" the stream based on size or time thresholds.
+*   **IndexingFilter**:
+    Technically a filter, but often acts as a destination by sending data directly into a Lucene or Elasticsearch index.
+
+
+## Schema Validation
+
+
+Using the **SchemaFilter** or enabling validation on parsers allows Stroom to ensure the structural integrity of the XML data as it flows through the pipeline.
+Schemas are typically provided by the `core-xml-schemas` and `event-logging-xml-schemas` content packs.
+
+
+### Advantages
+
+
+*   **Data Quality**:
+    Guarantees that the data conforms to the expected structure before it is indexed or stored.
+*   **Early Error Detection**:
+    Identifies issues in XSLT or parser logic immediately as they occur in the pipeline.
+*   **Documentation**:
+    Schemas act as a formal definition of the data format.
+*   **Standardization**:
+    Encourages the use of standard formats like the Event Logging schema.
+
+
+### Disadvantages
+
+
+*   **Performance Overhead**:
+    XML schema validation is a computationally expensive process and can significantly reduce pipeline throughput.
+*   **Schema Maintenance**:
+    Requires schemas to be kept up to date as data formats evolve.
+*   **Rigidity**:
+    If an unexpected but valid variation in data occurs, the pipeline may fail or drop records if the schema is too restrictive.
+
+
+{{% note %}}
+It is common practice to enable schema validation during pipeline development and testing, but disable it in high-volume production environments once the processing logic is proven, to maximize performance.
+{{% /note %}}
 
 
 ## Common Element Properties
 
+
 Most elements have properties that control their behavior.
 Common ones include:
+
 
 | Property | Description |
 | :--- | :--- |
@@ -89,13 +161,29 @@ Common ones include:
 
 ## Role and Visibility
 
+
 When viewing elements in the Pipeline UI, you may see different roles:
 
-*   **Target:** The element receives data from a previous element.
-*   **Mutator:** The element modifies the data as it passes through.
-*   **Destination:** The element is an end-point for the data.
+
+*   **Target**:
+    The element receives data from a previous element.
+*   **Mutator**:
+    The element modifies the data as it passes through.
+*   **Destination**:
+    The element is an end-point for the data.
+
 
 Elements also have different **Visibility**:
 
-*   **Simple:** Visible in the standard pipeline editor.
-*   **Stepping:** Visible and interactive during the debugging/stepping process.
+
+*   **Simple**:
+    Visible in the standard pipeline editor.
+*   **Stepping**:
+    Visible and interactive during the debugging/stepping process.
+
+
+---
+
+| Navigation          |                           |                   |
+|:--------------------|---------------------------|------------------:|
+| {{< prev-page >}}   | [Up]({{< relref "./" >}}) | {{< next-page >}} |
