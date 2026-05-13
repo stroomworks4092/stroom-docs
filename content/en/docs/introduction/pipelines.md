@@ -29,7 +29,7 @@ Each element performs a specific job—reading a file, parsing text, transformin
     The "conveyor belts" that connect one element to the next, defining the direction of data flow.
 
 
-For more details on specific elements, see {{< relref "pipelines2.md" >}}. <!-- TODO Error here -->
+For more details on specific elements, see {{< relref "intro-pipeline-elements.md" >}}. <!-- TODO Error here -->
 
 
 ### The Streaming Model (SAX)
@@ -91,10 +91,12 @@ When a pipeline runs, data moves through three distinct phases:
 ## The Stepper: Seeing Inside the Pipe
 
 
-Because pipelines can be complex, Stroom provides a tool called the **Stepper** {{< stroom-icon "step.svg" >}}.
+Because pipelines can be complex, Stroom [Feeds]({{< relref "feed" >}} ) provide a tool called the **Stepper** {{< stroom-icon "step.svg" >}}.
 It allows you to "step" through the data record by record.
 You can see the input and output of every single element in the pipeline simultaneously.
 This makes it easy to identify exactly where a transformation might be failing.
+
+You can find the {{< stroom-icon "step.svg" >}} button in the lower right-hand corner of the Feed Data page.
 
 
 ## Summary

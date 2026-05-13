@@ -48,7 +48,7 @@ The examples below assume your pipeline produces XML in the `records:2` format a
 
 Every visualisation must implement a standard JavaScript interface and receive data from a linked **Table** component.
 The Table defines the aggregation, and the Visualisation settings map specific table columns to chart parameters.
-For more information on the data bridge, see {{< relref "dashboards.md" >}}.
+For more information on the data bridge, see [dashboards]({{< relref "dashboards.md" >}}).
 
 
 ## Standard Visualisations

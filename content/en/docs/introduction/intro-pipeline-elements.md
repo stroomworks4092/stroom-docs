@@ -1,6 +1,6 @@
 ---
-title: "Pipeline Elements Reference"
-linkTitle: "Pipeline Elements Detail"
+title: "Pipeline Elements"
+linkTitle: "Pipeline Elements"
 weight: 10
 description: >
   Detailed information about the categories and individual elements used in Stroom pipelines.
@@ -36,7 +36,7 @@ Parsers convert raw input data (bytes) into XML events (SAX events).
 
 *   {{< pipe-elm "DSParser" >}}:
     The Data Splitter parser.
-    It uses a "Text Converter" (defined in a separate document) to parse structured text like CSV, TSV, or fixed-width logs into XML.
+    It uses a {{< stroom-doc "TextConverter" >}} (defined in a separate document) to parse structured text like CSV, TSV, or fixed-width logs into XML.
 *   {{< pipe-elm "XMLParser" >}}:
     Used when the input data is already XML.
     It validates and parses the input into SAX events.

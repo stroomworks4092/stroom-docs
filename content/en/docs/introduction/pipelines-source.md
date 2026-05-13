@@ -116,10 +116,10 @@ Unlike traditional logs, it allows you to visualize the data transformation as i
 ### How to Start Stepping
 
 
-1.  Navigate to a **Feed** or the **Stream Store**.
+1.  Navigate to a {{< stroom-doc "Feed" >}} or the **Stream Store**.
 1.  Select a stream that you want to test your pipeline against.
-1.  Click the **Step** button (represented by a "Step" icon or found in the context menu).
-1.  Choose the **Pipeline** you want to debug.
+1.  Click the **Step** {{< stroom-icon "step.svg" >}} button (represented by an icon or found in the context menu).
+1.  Choose the {{< stroom-doc "Pipeline" >}} you want to debug.
 
 
 ### What the Stepper Shows
