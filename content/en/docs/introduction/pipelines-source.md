@@ -18,7 +18,7 @@ This document explains the relationship between the Stroom Data Store, Processor
 ## The Entry Point: The `Source` Element
 
 
-Every pipeline begins with a **Source** element.
+Every pipeline begins with a {{< pipe-elm "Source" >}} element.
 This is a special, non-removable element that acts as the gateway.
 It handles the low-level details of:
 
@@ -55,7 +55,7 @@ When configuring your pipeline source via a Processor Filter, you typically deal
 
 This is the "virgin" data as it was received from the source system (e.g., via Stroom Proxy).
 It is usually unstructured text, CSV, or raw JSON.
-Pipelines processing this data typically use a `DSParser` to convert it into XML.
+Pipelines processing this data typically use a {{< pipe-elm "DSParser" >}} to convert it into XML.
 
 
 ### Events (Processed Data)
@@ -63,7 +63,7 @@ Pipelines processing this data typically use a `DSParser` to convert it into XML
 
 This is data that has already passed through an initial normalization pipeline.
 It is already in XML format (usually conforming to the Event-Logging schema).
-Pipelines processing this data often skip the Parser and use an `XMLParser`.
+Pipelines processing this data often skip the Parser and use an {{< pipe-elm "XMLParser" >}}.
 
 
 ### Context Data
@@ -87,7 +87,7 @@ Every stream in Stroom consists of two parts:
 
 
 The **Processor Filter** uses the Meta Data to decide which streams should be processed.
-When the pipeline runs, the `Source` element provides both the raw data and access to these Meta Data attributes.
+When the pipeline runs, the {{< pipe-elm "Source" >}} element provides both the raw data and access to these Meta Data attributes.
 These can be used as "Header" variables in your XSLT transformations.
 
 

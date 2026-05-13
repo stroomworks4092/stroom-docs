@@ -23,12 +23,12 @@ This allows for multi-stage processing.
 For example, Normalization -> Enrichment -> Indexing.
 
 
-*   **StreamAppender**:
+*   {{< pipe-elm "StreamAppender" >}}:
     Writes the output as a new stream.
     You must specify:
     *   **Feed**: Which feed the new data belongs to.
     *   **Stream Type**: Typically `Events` (for processed data) or `Context`.
-*   **RollingStreamAppender**:
+*   {{< pipe-elm "RollingStreamAppender" >}}:
     Used for high-volume output.
     It pools data and only creates a new stream in the database when a certain size or time threshold is met.
     This reduces database overhead.
@@ -41,10 +41,10 @@ Data often needs to be made searchable.
 This is achieved by sending XML events into an indexing element.
 
 
-*   **IndexingFilter**:
+*   {{< pipe-elm "IndexingFilter" >}}:
     Sends data to a standard Stroom Lucene index.
     The XSLT must produce XML that matches the index's field structure.
-*   **ElasticIndexingFilter**:
+*   {{< pipe-elm "ElasticIndexingFilter" >}}:
     Sends data to an external Elasticsearch cluster.
     Like the Lucene filter, it requires specific XML field mappings.
 
@@ -52,16 +52,16 @@ This is achieved by sending XML events into an indexing element.
 ## Plan B (State Store)
 
 
-**Plan B** is Stroom's high-performance state management system.
+**Plan B** {{< stroom-icon "document/PlanB.svg" >}} is Stroom's high-performance state management system.
 It is used for storing "state" that can be looked up by other pipelines.
 For example, "What was the last known IP for this user?".
 
 
-*   **PlanBFilter**:
+*   {{< pipe-elm "PlanBFilter" >}}:
     Instead of writing to a stream or index, this filter writes data into an **LMDB (Lightning Memory-Mapped Database)** shard.
 *   **How it works**:
     1.  The pipeline processes data (often with a `Reference Data` stream type).
-    1.  The `PlanBFilter` at the end of the pipe populates an LMDB map (State, Temporal State, Session, etc.).
+    1.  The {{< pipe-elm "PlanBFilter" >}} at the end of the pipe populates an LMDB map (State, Temporal State, Session, etc.).
     1.  Once the pipeline completes, the shard is uploaded to storage nodes for central merging.
 *   **Usage**:
     Other pipelines can then perform ultra-fast lookups against these Plan B maps using the `stroom:lookup()` XSLT function or the `getState()` Dashboard function.
@@ -73,12 +73,12 @@ For example, "What was the last known IP for this user?".
 Pipelines can also "push" data out of Stroom entirely:
 
 
-*   **HTTPAppender**:
+*   {{< pipe-elm "HTTPAppender" >}}:
     Posts the processed data to a remote URL via HTTP or HTTPS.
     This is useful for forwarding alerts to a SOC or a third-party ticketing system.
-*   **FileAppender**:
+*   {{< pipe-elm "FileAppender" >}}:
     Writes the output directly to the local file system of the Stroom node.
-*   **HDFSFileAppender**:
+*   {{< pipe-elm "HDFSFileAppender" >}}:
     Writes data to a Hadoop Distributed File System.
 
 

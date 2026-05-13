@@ -29,7 +29,7 @@ Each element performs a specific job—reading a file, parsing text, transformin
     The "conveyor belts" that connect one element to the next, defining the direction of data flow.
 
 
-For more details on specific elements, see {{< relref "pipelines2.md" >}}.
+For more details on specific elements, see {{< relref "pipelines2.md" >}}. <!-- TODO Error here -->
 
 
 ### The Streaming Model (SAX)
@@ -46,20 +46,20 @@ This allows Stroom to process massive multi-gigabyte files with a very small and
 A common pipeline for ingesting data usually follows this sequence:
 
 
-1.  **Reader**:
+1. {{< pipe-elm "Reader" >}}:
     Reads the raw bytes from a stream.
 1.  **Parser**:
     Converts the raw text into XML events.
-    The most common parser is the **DSParser** (Data Splitter), which uses a "Text Converter" to turn CSV or log files into XML.
+    The most common parser is the {{< pipe-elm "DSParser" >}}, which uses a {{< stroom-doc "TextConverter" >}} to turn CSV or log files into XML.
 1.  **Filter**:
     Acts on the XML events.
-    The most powerful filter is the **XSLTFilter**, which uses XSLT to transform the structure of the data.
-    This includes tasks like renaming fields, adding timestamps, or performing lookups.
+    The most powerful filter is the {{< pipe-elm "XSLTFilter" >}}, which uses XSLT to transform the structure of the data.
+    This includes tasks like renaming fields, adding timestamps, or performing lookups. Filters reference a {{< stroom-doc "XSLT" >}} document.
 1.  **Writer**:
-    Formats the XML events back into a specific format (e.g., **XMLWriter** or **JSONWriter**).
+    Formats the XML events back into a specific format (e.g., {{< pipe-elm "XMLWriter" >}} or {{< pipe-elm "JSONWriter" >}}.
 1.  **Appender**:
     Saves the final output to a destination.
-    This could be another stream (**StreamAppender**), a search index (**IndexingFilter**), or a file.
+    This could be another stream ({{< pipe-elm "StreamAppender" >}}), a search index ({{<pipe-elm "IndexingFilter" >}}), or a file.
 
 
 ## Pipeline Inheritance
@@ -91,7 +91,7 @@ When a pipeline runs, data moves through three distinct phases:
 ## The Stepper: Seeing Inside the Pipe
 
 
-Because pipelines can be complex, Stroom provides a tool called the **Stepper**.
+Because pipelines can be complex, Stroom provides a tool called the **Stepper** {{< stroom-icon "step.svg" >}}.
 It allows you to "step" through the data record by record.
 You can see the input and output of every single element in the pipeline simultaneously.
 This makes it easy to identify exactly where a transformation might be failing.
