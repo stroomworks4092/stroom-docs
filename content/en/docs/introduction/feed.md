@@ -125,10 +125,38 @@ When you create a filter to trigger a pipeline, you specify both the **Feed** an
 ## Getting Data into a Feed
 
 
-There are two primary mechanisms for sending data to a Stroom feed:
+There are three mechanisms for sending data to a Stroom feed:
 
 
-### 1. Direct HTTP POST (The Datafeed)
+### Upload within the UI
+
+You can upload a file within the Stroom UI by using the Upload {{< stroom-icon "upload.svg" >}} button within a feed. 
+
+You will be asked for the following information:
+
+#### Meta Data
+
+Any metadata key:value pairs required. See below for more information.
+
+#### Type
+
+The type of this data within the stream. See above for more information.
+
+#### Effective Date
+
+The Effective Date is stored as the `EffectiveTime` attribute on the resulting stream. 
+Its primary use is for **Reference Data** lookups:
+
+##### Lineage Selection
+
+  * When a pipeline performs a lookup against a reference feed, Stroom uses the event time of the record being processed to find the most appropriate reference stream.
+  * **Latest-not-after Logic**: Stroom will select the reference stream whose `EffectiveTime` is the latest possible value that is still **less than or equal to** the event time.   
+
+If a feed is not used for reference data, the Effective Date is purely informational and defaults to the creation time of the stream if not provided. 
+However, it can still be used as a filter criterion in search expressions.
+
+
+### Direct HTTP POST (The Datafeed)
 
 
 Data can be posted directly to the Stroom `datafeed` endpoint using standard HTTP tools like `curl`.
@@ -139,7 +167,7 @@ Data can be posted directly to the Stroom `datafeed` endpoint using standard HTT
 *   **Body**: The raw bytes of the data.
 
 
-### 2. Stroom Proxy
+### Stroom Proxy
 
 
 For high-volume production environments, **Stroom Proxy** is used.
