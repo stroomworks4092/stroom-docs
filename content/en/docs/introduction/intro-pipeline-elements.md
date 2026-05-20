@@ -143,6 +143,37 @@ It is common practice to enable schema validation during pipeline development an
 {{% /note %}}
 
 
+### Configuration
+
+
+To validate your data against a schema, follow these steps:
+
+1. Prepare your XML Data
+   Your XML must include a namespace and a schemaLocation attribute on its root element(s).
+    ```xml
+    <Events xmlns="event-logging:3"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="event-logging:3 file://event-logging-v3.4.2.xsd">
+        ...
+    </Events>
+    ```
+
+1. Create an XML Schema Document in Stroom
+1. Upload your XSD file to Stroom as a new XML Schema document.
+1. Configure the following properties on the document:
+    * Namespace URI: Must match the xmlns in your XML (e.g., event-logging:3).
+    * System Id: Must match the location part of xsi:schemaLocation (e.g., file://event-logging-v3.4.2.xsd).
+    * Schema Group: (Recommended) Give it a name like EVENTS or REFERENCE_DATA. 
+      This allows you to group different versions of the same schema.
+
+1. Configure the Pipeline
+   Add the SchemaFilter element to your pipeline (usually after a Parser or XSLTFilter) and configure its properties:
+    * schemaGroup: Set this to match the Schema Group you defined on your XML Schema document. 
+      This is the most robust way to ensure the correct schema is selected.
+    * schemaValidation: Set to true (default) to enable validation.
+    * namespaceURI / systemId: (Optional) Can be used to further restrict which schemas are considered valid for this filter.
+
+
 ## Common Element Properties
 
 

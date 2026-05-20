@@ -1,109 +1,12 @@
 ---
-title: "Pipeline Data Sources"
-linkTitle: "Pipeline Data Sources"
-weight: 15
+title: "Pipeline Debugging"
+linkTitle: "Pipeline Debugging"
+weight: 21
 description: >
-  Understanding how data enters a pipeline from the Stroom data store.
-tags: 
-  - processing
-  - feed
+  How to check if a pipeline is working, and what to do if it isn't doing what you expect.
+tags:
+  - pipeline
 ---
-
-
-In Stroom, data doesn't just "arrive" at a pipeline.
-Instead, pipelines are attached to streams of data that have already been stored in the system.
-This document explains the relationship between the Stroom Data Store, Processors, and the Pipeline Source.
-
-
-## The Entry Point: The `Source` Element
-
-
-Every pipeline begins with a {{< pipe-elm "Source" >}} element.
-This is a special, non-removable element that acts as the gateway.
-It handles the low-level details of:
-
-
-1.  Opening the data stream from the underlying storage.
-1.  Decompressing the data if necessary (e.g., ZIP or GZIP).
-1.  Providing the raw byte stream to the first "Reader" or "Parser" in your pipeline.
-
-
-## How Pipelines are Triggered
-
-
-Data is fed into a pipeline via a **Processor Filter**.
-This is the "engine" that drives the work:
-
-
-1.  **Definition**:
-    You create a Processor Filter on a Pipeline and define a set of criteria (e.g., "All streams for Feed 'MY_FEED' with type 'Raw Events'").
-1.  **Task Creation**:
-    The system constantly scans the data store for new streams matching those criteria.
-    When it finds one, it creates a **Processor Task**.
-1.  **Execution**:
-    A worker thread picks up the task, initializes the pipeline, and points the `Source` element to that specific stream.
-
-
-## Types of Input Data
-
-
-When configuring your pipeline source via a Processor Filter, you typically deal with three main categories of data:
-
-
-### Raw Events
-
-
-This is the "virgin" data as it was received from the source system (e.g., via Stroom Proxy).
-It is usually unstructured text, CSV, or raw JSON.
-Pipelines processing this data typically use a {{< pipe-elm "DSParser" >}} to convert it into XML.
-
-
-### Events (Processed Data)
-
-
-This is data that has already passed through an initial normalization pipeline.
-It is already in XML format (usually conforming to the Event-Logging schema).
-Pipelines processing this data often skip the Parser and use an {{< pipe-elm "XMLParser" >}}.
-
-
-### Context Data
-
-
-Context data is "supplementary" data sent alongside a main event stream.
-It often contains information about the environment (e.g., hostname, IP mapping).
-A pipeline can be configured to read this context data to enrich the main event stream using XSLT lookups.
-
-
-## The Meta Store Connection
-
-
-Every stream in Stroom consists of two parts:
-
-
-*   **The Data**:
-    The actual content (bytes).
-*   **The Meta Data**:
-    Attributes about the data (Feed Name, Stream Type, Creation Time, Received Host, etc.).
-
-
-The **Processor Filter** uses the Meta Data to decide which streams should be processed.
-When the pipeline runs, the {{< pipe-elm "Source" >}} element provides both the raw data and access to these Meta Data attributes.
-These can be used as "Header" variables in your XSLT transformations.
-
-
-## Key Properties of Input Streams
-
-
-When troubleshooting why data isn't being fed into your pipeline, check these meta attributes:
-
-
-*   **Status**:
-    Only streams with a status of `Locked` (while being written) or `Unlocked` (ready for use) can be processed.
-    `Deleted` or `Hidden` streams are ignored.
-*   **Stream Type**:
-    Ensure your Processor Filter is looking for the correct type (e.g., `Raw Events` vs `Raw Reference`).
-*   **Feed**:
-    The pipeline will only process data associated with the specific Feed(s) defined in the filter.
 
 
 ## Debugging with Stepping Mode
@@ -116,10 +19,8 @@ Unlike traditional logs, it allows you to visualize the data transformation as i
 ### How to Start Stepping
 
 
-1.  Navigate to a {{< stroom-doc "Feed" >}} or the **Stream Store**.
-1.  Select a stream that you want to test your pipeline against.
-1.  Click the **Step** {{< stroom-icon "step.svg" >}} button (represented by an icon or found in the context menu).
-1.  Choose the {{< stroom-doc "Pipeline" >}} you want to debug.
+1.  Navigate to a {{< stroom-doc "Pipeline" >}}, Structure tab. 
+1.  Click the **Step** {{< stroom-icon "step.svg" >}} button in the toolbar.
 
 
 ### What the Stepper Shows
@@ -221,8 +122,41 @@ If a stream fails during processing, it will often be marked as **Error** in the
     Stroom often attaches an "Error Stream" to the failed task containing the specific SAX or XSLT error message.
 
 
-You can also look at the {{< stroom-doc "Feed" >}} Data tab and see if there is a stream of Type=`Error` within the Feed. 
+You can also look at the {{< stroom-doc "Feed" >}} Data tab and see if there is a stream of Type=`Error` within the Feed.
 This is where errors raised in processing the feed will be written.
+
+
+### Reprocessing Streams
+
+
+It is possible to reprocess streams, but the option is located in a different part of the UI than where you create standard "standing" Processor Filters.
+
+
+To reprocess a stream (or a set of streams):
+
+
+1. Go to the Data tab: Navigate to the Data tab of a Feed, Pipeline, or Folder.
+1. Select the Stream(s): Select the specific stream(s) you wish to reprocess. 
+   You can use filters to narrow down the list if needed.
+1. Click the Process button: Click the Process {{< stroom-icon "process.svg" >}} button in the toolbar above the stream list.
+1. Enable "Reprocess data": In the Process Choice dialog that appears, you will see a checkbox labeled Reprocess data. 
+   Checking this ensures that Stroom ignores any existing processing history for those streams and processes them again.
+1. Choose Pipeline: If you initiated this from a Feed or Folder, you will be prompted to choose the Pipeline to use for the reprocessing.
+
+
+{{% note %}}
+To see the Process {{< stroom-icon "process.svg" >}} button, your user account must have the `Manage Processors` application permission.
+{{% /note %}}
+
+#### Why is it there?
+
+
+Stroom distinguishes between Standing Filters (which automatically process new data as it arrives) and Reprocess Filters (which are targeted at specific existing data).
+
+When you use the "Process" button with "Reprocess data" checked, Stroom creates a temporary Processor Filter configured specifically for your selection. 
+Once it has finished processing that batch of data, the filter has completed its job.
+
+Note: If you are reprocessing data to fix a bug or update a schema, remember to delete the previous (incorrect) output streams first to avoid having duplicate records in your downstream system.
 
 
 ### Common Issues
@@ -236,11 +170,15 @@ This is where errors raised in processing the feed will be written.
     Check your XSLT logic and namespaces.
 *   **Fatal Errors**:
     These often relate to system issues like "Disk Full" on an appender or "Network Timeout" on an HTTP appender.
+*   **Incorrect XML**:
+    * If using {{< stroom-doc "PlanB" >}} there must be a `<map>name</map>` element within the `<referenceData>` XML to ensure that the data is written to the right data store.
+    * Ensure that the schema of the data is correct for the destination. 
+      You can use a {{< pipe-elm "SchemaFilter" >}} pipeline element during development to ensure that the format is correct.
 
 
 {{% note %}}
 If a Processor Filter has already scanned all available data and found nothing, it may not automatically pick up "old" data that existed before the filter was created.
-In some cases, you may need to **Delete and Recreate** the filter to force a fresh scan of the data store from the beginning.
+In some cases, you may need to **Delete and Recreate** the Processor Filter to force a fresh scan of the data store from the beginning.
 {{% /note %}}
 
 

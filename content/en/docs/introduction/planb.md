@@ -61,7 +61,9 @@ Plan B uses a "Local Write, Central Merge, Snapshot Read" architecture:
 
 
 To load data into Plan B, you create a pipeline that uses the **PlanBFilter** as its final destination element.
-This filter consumes XML in the `reference-data:2` namespace.
+This filter consumes XML in the `reference-data:2` namespace. 
+The data includes a `<map>name</map` element which corresponds to the name of the {{< stroom-doc "PlanB" >}} document you want to store the data in.
+
 
 
 ### Example Setup: User Location Tracking
