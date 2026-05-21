@@ -27,8 +27,10 @@ For example, if an event contains a `userId`, you might use reference data to lo
 
 
 Reference data is:
-*   **Time-Sensitive**: Lookups (for Off-Heap data) use the event's timestamp to find the "effective" version of the reference data at that point in time.
-*   **Reusable**: A single reference stream can be used by many different pipelines.
+*   **Time-Sensitive**:
+    Lookups (for Off-Heap data) use the event's timestamp to find the "effective" version of the reference data at that point in time.
+*   **Reusable**:
+    A single reference stream can be used by many different pipelines.
 
 
 ## The Reference Data Pipeline
@@ -47,18 +49,18 @@ A reference pipeline must contain the following elements:
 1.  **Parser**:
     Converts raw reference source (CSV, XML, etc.) into XML events.
     For example, use the {{< pipe-elm "DSParser" >}} for CSV data.
-2.  **XSLT Filter**:
+1.  {{< pipe-elm "XSLTFilter" >}}:
     Transforms the parsed XML into the specific **Reference Data Schema** (see below).
     The {{< pipe-elm "XSLTFilter" >}} must use the `reference-data:2` namespace in its output.
-3.  **ReferenceDataFilter**:
+1.  {{< pipe-elm "ReferenceDataFilter" >}}:
     The final element in the chain.
     It "listens" for the XML produced by the XSLT and writes the keys, maps, and values into the Store.
 
 
 {{% note %}}
-The ReferenceDataFilter is a **terminal element**.
+The **ReferenceDataFilter** is a **terminal element**.
 It writes data directly to the internal store and does not produce output for further elements.
-Consequently, reference pipelines do not require (and typically do not have) a StreamAppender.
+Consequently, reference pipelines do not require (and typically do not have) a **StreamAppender**.
 {{% /note %}}
 
 
@@ -97,9 +99,20 @@ The XSLT in a reference pipeline must produce XML conforming to the `reference-d
 
 {{% warning %}}
 The `<map>` element is **crucial** as it defines the "bucket" or "set" of reference data (the map name) that the record belongs to.
-This is **not** set in the Stroom user interface (e.g., it is not a property of the ReferenceDataFilter.
+This is **not** set in the Stroom user interface (e.g., it is not a property of the **ReferenceDataFilter**).
 It is purely defined in the XML produced by the XSLT of your reference pipeline.
 {{% /warning %}}
+
+
+### Naming convention
+
+
+The convention is to name the map in UPPER_SNAKE_CASE using INPUT_TO_OUTPUT_MAP.
+For example:
+- FILENO_TO_LOCATION_MAP
+- HOSTNAME_TO_IP_MAP
+
+This is only suggested as a convention; it is not enforced.
 
 
 #### Key-Value Pair
@@ -111,7 +124,7 @@ Used for simple mappings like ID to Name.
 ```xml
 <referenceData xmlns="reference-data:2">
   <reference>
-    <map>UserToDepartment</map>
+    <map>USER_TO_DEPARTMENT_MAP</map>
     <key>jbloggs</key>
     <value>Engineering</value>
   </reference>
@@ -129,7 +142,7 @@ The `from` and `to` values must be long integers.
 ```xml
 <referenceData xmlns="reference-data:2">
   <reference>
-    <map>IpToLocation</map>
+    <map>IP_TO_LOCATION_MAP</map>
     <from>3232235521</from> <!-- 192.168.0.1 -->
     <to>3232235775</to>   <!-- 192.168.0.255 -->
     <value>UK_OFFICE</value>
@@ -139,7 +152,7 @@ The `from` and `to` values must be long integers.
 
 
 {{% note %}}
-The `<value>` element can contain a simple string or a complex XML fragment (e.g., an entire `<evt:User>` object).
+The `<value>` element can contain a simple string or a complex XML fragment (e.g., an entire `<evt:User>` object). [TBC]
 {{% /note %}}
 
 
@@ -179,9 +192,9 @@ For `stroom:lookup` to find data, you must link the event pipeline to the refere
 
 
 1.  Open the **Event Pipeline**.
-2.  Select the {{< pipe-elm "XSLTFilter" >}} that performs the lookup.
-3.  Go to the **Pipeline References** tab.
-4.  Add a reference to the **Reference Feed** and specify the **Reference Pipeline**.
+1.  Select the {{< pipe-elm "XSLTFilter" >}} that performs the lookup.
+1.  Go to the **Pipeline References** tab.
+1.  Add a reference to the **Reference Feed** and specify the **Reference Pipeline**.
 
 
 ## Configuration
@@ -204,9 +217,12 @@ This is used for **External Reference Data** (any Stream Type except `Context`).
 It is the most common storage type, used for data that is shared across many event streams and is effective-time sensitive.
 
 
-*   **Trigger**: Added as a Pipeline Reference with Stream Type `Reference`.
-*   **Persistence**: Data persists across service restarts.
-*   **Scale**: Can exceed the size of the JVM heap as it is stored on disk (LMDB).
+*   **Trigger**:
+    Added as a Pipeline Reference with Stream Type `Reference`.
+*   **Persistence**:
+    Data persists across service restarts.
+*   **Scale**:
+    Can exceed the size of the JVM heap as it is stored on disk (LMDB).
 
 
 #### On-Heap (Memory)
@@ -216,9 +232,12 @@ This is used for **Context Data** (specifically Stream Type `Context`).
 Context data is transient reference data that is attached specifically to a single event stream.
 
 
-*   **Trigger**: Added as a Pipeline Reference with Stream Type `Context`.
-*   **Persistence**: Data is transient and is discarded once the stream has been processed.
-*   **Scale**: Limited by the available JVM heap space.
+*   **Trigger**:
+    Added as a Pipeline Reference with Stream Type `Context`.
+*   **Persistence**:
+    Data is transient and is discarded once the stream has been processed.
+*   **Scale**:
+    Limited by the available JVM heap space.
 
 
 ### Key Parameters
@@ -307,9 +326,9 @@ S02,New York Branch,New York
 
 1.  **DSParser**:
     Uses a Data Splitter to convert the CSV into XML.
-2.  **XSLTFilter**:
+1.  **XSLTFilter**:
     Transforms the CSV-XML into the `reference-data:2` format.
-3.  **ReferenceDataFilter**:
+1.  **ReferenceDataFilter**:
     Indexes the result into the store.
 
 
@@ -319,7 +338,7 @@ S02,New York Branch,New York
 ```xml
 <referenceData xmlns="reference-data:2">
   <reference>
-    <map>SiteLookup</map>
+    <map>SITEID_TO_LOCATION_MAP</map>
     <key>S01</key>
     <value>
       <site>
@@ -358,8 +377,8 @@ This is the XML produced by the parser in your **Event Pipeline**.
 
 1.  **XSLTFilter**:
     Performs the lookup.
-2.  **Pipeline Reference**:
-    Added to the XSLTFilter, pointing to the **Reference Feed** containing the site data.
+1.  **Pipeline Reference**:
+    Added to the **XSLTFilter**, pointing to the **Reference Feed** containing the site data.
 
 
 **Enrichment XSLT:**
@@ -373,7 +392,7 @@ This is the XML produced by the parser in your **Event Pipeline**.
 
 
     <!-- Perform the lookup -->
-    <xsl:variable name="siteData" select="stroom:lookup('SiteLookup', siteId)"/>
+    <xsl:variable name="siteData" select="stroom:lookup('SITEID_TO_LOCATION', siteId)"/>
 
 
     <!-- Add enriched fields from the XML fragment in the reference value -->
@@ -404,6 +423,51 @@ The enriched event now contains the data looked up from the reference store.
 ## Troubleshooting
 
 
+### Reloading and Refreshing Reference Data
+
+
+Stroom caches reference data in an internal store (LMDB) to ensure high performance.
+**Changing a pipeline's XSLT will not automatically update data already in the store.**
+
+
+#### How to Force a Refresh
+
+
+To see XSLT changes reflected in your lookups, you must invalidate the existing stored data.
+
+
+1.  **Identify the Stream**:
+    Open the **Explorer** and locate the **Feed** that provides the reference data.
+    Open the feed and click the **Data** tab.
+    Select the stream in the top list, then look at the **Info** tab in the **bottom pane**.
+    The **Stream Id** field in that list is the Stream ID you need.
+1.  **Purge the Store**:
+    You must remove the existing entries for that stream so Stroom is forced to re-run the pipeline.
+    Go to **Help** > **API Specification** in the main menu to open Swagger, then find the `purgeByStream` endpoint.
+    Click the **Try it out** button to enable editing, enter your **Stream Id** (and optionally the **nodeName**), and click **Execute**.
+    You can also use a `DELETE` request to `/stroom/v1/refData/purgeByStream/{streamId}?nodeName={nodeName}`.
+    For a single-node setup, leave the **nodeName** blank/null.
+    For a cluster, provide the name of the node (found in **Monitoring** > **Nodes**).
+    To ensure a full refresh in a cluster, repeat the purge for each node name.
+1.  **Clear Caches**:
+    Clear the following in **Monitoring** > **Cache** (found in the main menu):
+    **ReferenceDataCache**: Forces Stroom to re-evaluate which streams are available.
+    **XsltPool**: **CRITICAL**.
+    Forces Stroom to re-compile your updated XSLT rather than using the old cached version.
+1.  **Trigger Reload**:
+    Perform a lookup.
+    Stroom will detect the missing data, find the source stream, and re-run the pipeline using your updated (and re-compiled) XSLT.
+
+
+#### Lazy Loading vs. Processing Filters
+
+
+*   **Lazy Loading**:
+    Data is refreshed the next time a lookup is requested after a purge.
+*   **Processing Filters**:
+    If you use processing filters to load reference data, you must **Delete** the old processing tasks to trigger a re-run of the filter.
+
+
 ### The "NEW" State Error
 
 
@@ -414,8 +478,8 @@ A common error during lookups is:
 This usually means the **Reference Pipeline** failed to start.
 This is rarely an issue with the lookup itself, but rather a configuration error in the reference pipeline, such as:
 *   A syntax error in the reference pipeline's XSLT.
-*   The reference pipeline is missing a Parser or a ReferenceDataFilter.
-*   The user lacks permissions to "Use" the reference pipeline or feed.
+*   The reference pipeline is missing a Parser or a **ReferenceDataFilter**.
+*   The user lacks permissions to **Use** the reference pipeline or feed.
 
 
 ---
